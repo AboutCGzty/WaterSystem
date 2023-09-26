@@ -216,7 +216,7 @@ Material:
     - _XTilling: 10
     - _YTilling: 1
     - _ZWrite: 1
-    - _causticsDisort: 1
+    - _causticsDisort: 0
     - _causticsIntensity: 0.3
     - _causticsTilling: 0.1
     - _crestDisort: 0
@@ -226,7 +226,7 @@ Material:
     - _deepOpacity: 0.95
     - _deepRange: 2.5
     - _fresnelIntensity: 1
-    - _fresnelRange: 6
+    - _fresnelRange: 8
     - _largeRippleIntensity: 1.5
     - _largeRippleSpeed: 0.1
     - _largeRippleTilling: 0.02
@@ -245,7 +245,7 @@ Material:
     - _underRange: 0
     - _waterMetallic: 0.1
     - _waterRoughness: 0.02
-    - _waveFadeEnd: 100
+    - _waveFadeEnd: 150
     - _waveFadeStart: 0
     - _waveHeight: 1.5
     - _waveNormalStr: 2
@@ -266,7 +266,7 @@ Material:
     - _SubWaveDirection: {r: -1, g: -1, b: -1, a: -1}
     - _WaveColor: {r: 0.3686275, g: 0.6431373, b: 0.9137255, a: 0}
     - _causticsParams: {r: 0.05, g: 0.05, b: 2, a: 0.07}
-    - _deepColor: {r: 0.16470589, g: 0.27450982, b: 0.26583698, a: 0}
+    - _deepColor: {r: 0.21960784, g: 0.29803923, b: 0.27560535, a: 0}
     - _envCenter: {r: 0, g: 0, b: 0, a: 0}
     - _envSize: {r: 100, g: 100, b: 100, a: 0}
     - _foamColor: {r: 1, g: 1, b: 1, a: 0}
