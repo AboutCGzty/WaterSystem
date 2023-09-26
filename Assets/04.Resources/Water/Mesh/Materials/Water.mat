@@ -216,7 +216,7 @@ Material:
     - _XTilling: 10
     - _YTilling: 1
     - _ZWrite: 1
-    - _causticsDisort: 0
+    - _causticsDisort: 1
     - _causticsIntensity: 0.3
     - _causticsTilling: 0.1
     - _crestDisort: 0
@@ -224,7 +224,7 @@ Material:
     - _crestRadius: 1.5
     - _crestRange: 1.45
     - _deepOpacity: 0.95
-    - _deepRange: 2.5
+    - _deepRange: 3
     - _fresnelIntensity: 1
     - _fresnelRange: 8
     - _largeRippleIntensity: 1.5
@@ -236,7 +236,7 @@ Material:
     - _reflectionBlur: 0
     - _reflectionDisort: 0.3
     - _reflectionDisortFadeOut: 2
-    - _refractionIntensity: 0.5
+    - _refractionIntensity: 0.3
     - _smallRippleIntensity: 2
     - _smallRippleSpeed: 0.1
     - _smallRippleTilling: 0.03
@@ -245,11 +245,11 @@ Material:
     - _underRange: 0
     - _waterMetallic: 0.1
     - _waterRoughness: 0.02
-    - _waveFadeEnd: 150
+    - _waveFadeEnd: 100
     - _waveFadeStart: 0
     - _waveHeight: 1.5
     - _waveNormalStr: 2
-    - _waveScale: 0.875
+    - _waveScale: 0.9
     - _waveSpeed: 2
     m_Colors:
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}

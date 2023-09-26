@@ -78,13 +78,7 @@ Shader "ZTY/LightingWater/URP"
 
     SubShader
     {
-        Tags
-        {
-            "RenderPipeline" = "UniversalPipeline"
-            "RenderType" = "Transparent"
-            "Queue" = "Transparent"
-            "IgnoreProjector" = "True" "ShaderModel" = "4.5"
-        }
+        Tags { "RenderPipeline" = "UniversalPipeline" "RenderType" = "Transparent" "Queue" = "Transparent" "IgnoreProjector" = "True" "ShaderModel" = "4.5" }
         Blend One Zero
         Pass
         {
@@ -171,11 +165,6 @@ Shader "ZTY/LightingWater/URP"
                 Light light = GetMainLight();
                 float3 light_Dir = light.direction;
                 float3 light_Color = light.color;
-
-                /////////////////////////////////////////////
-                //    ReconstructWorldPositionfromDepth    //
-                /////////////////////////////////////////////
-                float4 depthToWorldPosition = ReconstructWorldPosition(_CameraDepthTexture, sampler_CameraDepthTexture, screenPosition.xy, input.pos_view);
                 
                 ////////////////////////
                 //    Water Ripple    //
@@ -221,6 +210,11 @@ Shader "ZTY/LightingWater/URP"
                 float2 uv_Planar = screenPosition.xy + lerp(float2(0.0, 0.0), finalWorldNormal.xz, _reflectionDisort);
                 float3 planarReflection = SAMPLE_TEXTURE2D(_PlanarReflectionTexture, sampler_PlanarReflectionTexture, uv_Planar).xyz;
 
+                /////////////////////////////////////////////
+                //    ReconstructWorldPositionfromDepth    //
+                /////////////////////////////////////////////
+                float4 depthToWorldPosition = ReconstructWorldPosition(_CameraDepthTexture, sampler_CameraDepthTexture, screenPosition.xy, input.pos_view);
+
                 //////////////////////////
                 //    Caustics Color    //
                 //////////////////////////
@@ -229,22 +223,24 @@ Shader "ZTY/LightingWater/URP"
                     color_caustics = GetCausticsColor(_causticsMap, sampler_causticsMap, depthToWorldPosition.xz, _causticsParams, finalWorldNormal.xz, _causticsDisort);
                 #endif
                 
-                ////////////////////////////
-                //    Refraction Color    //
-                ////////////////////////////
-                float2 refractionUV = 0.0;
-                #ifdef _USEREFRACTION
-                    refractionUV = finalWorldNormal.xz;
-                #endif
-                float3 color_Refraction = GetRefractionColor(refractionUV, _refractionIntensity, _CameraDepthTexture, sampler_CameraDepthTexture, input.pos_clip.z, input.pos_clip.w, _CameraOpaqueTexture, sampler_CameraOpaqueTexture, screenPosition.xy);
-
                 ///////////////////////
                 //    Water alpha    //
                 ///////////////////////
-                float depth_water = worldPosition.y - depthToWorldPosition.y;
+                // 采样原始深度图并计算水的深度值
+                float depthTexture = SAMPLE_TEXTURE2D(_CameraDepthTexture, sampler_CameraDepthTexture, screenPosition.xy).x;
+                float depthScene = LinearEyeDepth(depthTexture, _ZBufferParams);
+                // 水初始（无扭曲）的深度值
+                float depth_water = depthScene + input.pos_view.z;
                 depth_water = saturate((1.0 - saturate(exp(-depth_water / max(0.5, _deepRange)))) * _deepOpacity);
-                float ndotv = saturate(dot(finalWorldNormal, cameraPosition));
-                float fresnelFactor = saturate(pow(1.0 - ndotv, _fresnelRange) * _fresnelIntensity);
+
+                ////////////////////////////
+                //    Refraction Color    //
+                ////////////////////////////
+                float2 refractionUV = screenPosition.xy;
+                #ifdef _USEREFRACTION
+                    refractionUV += finalWorldNormal.xz * _refractionIntensity * 0.1;
+                #endif
+                float3 color_Refraction = GetRefractionColor(refractionUV, _CameraDepthTexture, sampler_CameraDepthTexture, input.pos_view.z, _CameraOpaqueTexture, sampler_CameraOpaqueTexture, screenPosition.xy);
                 
                 /////////////////////////
                 //    Water Specular   //
@@ -256,6 +252,8 @@ Shader "ZTY/LightingWater/URP"
                 ///////////////////////
                 float3 shallowAreaColor = color_Refraction * (1.0 - depth_water) + color_caustics * (1.0 - depth_water) * depth_water;
                 shallowAreaColor *= _shallowColor.xyz;
+                float ndotv = saturate(dot(finalWorldNormal, cameraPosition));
+                float fresnelFactor = saturate(pow(1.0 - ndotv, _fresnelRange) * _fresnelIntensity);
                 float3 surfaceColor = lerp(_deepColor.xyz, planarReflection, fresnelFactor);
                 #ifdef _USECREST
                     surfaceColor += crestColor;
