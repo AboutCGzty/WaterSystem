@@ -4,7 +4,7 @@ Shader "ZTY/LightingWater/URP"
     {
         [Header(Tone Mapping ______________________________________________________________________________________________________________________________________________________________)]
         [Space(10)]
-        [Toggle(_ACES_ON)]_ACESON ("ACES On", int) = 1
+        [Toggle(_ACES_ON)]_ACESON ("ACES On", int) = 0
         [Header(Surface Color _____________________________________________________________________________________________________________________________________________________________)]
         [Header((Basecolor))]
         [Space(10)]
@@ -82,19 +82,18 @@ Shader "ZTY/LightingWater/URP"
         Blend One Zero
         Pass
         {
+            Tags { "LightMode" = "UniversalForward" }
             Name "Water"
             HLSLPROGRAM
             #pragma vertex LitPassVertex
             #pragma fragment LitPassFragment
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
-            #include "./Input_Wave.hlsl"
             #include "./Input_Normal.hlsl"
+            #include "./Input_Wave.hlsl"
             #include "./Input_Caustics.hlsl"
             #include "./Input_Refraction.hlsl"
             #include "./Input_Color.hlsl"
-            #include "./BRDFLibrary.cginc"
-            
             // Keywords
             #pragma shader_feature_local _ACES_ON
             #pragma shader_feature_local _USECREST

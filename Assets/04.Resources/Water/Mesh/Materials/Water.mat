@@ -224,8 +224,8 @@ Material:
     - _crestRadius: 1.5
     - _crestRange: 1.45
     - _deepOpacity: 0.95
-    - _deepRange: 3
-    - _fresnelIntensity: 1
+    - _deepRange: 5
+    - _fresnelIntensity: 1.5
     - _fresnelRange: 8
     - _largeRippleIntensity: 1.5
     - _largeRippleSpeed: 0.1
@@ -235,7 +235,7 @@ Material:
     - _planarReflectionRange: 2
     - _reflectionBlur: 0
     - _reflectionDisort: 0.3
-    - _reflectionDisortFadeOut: 2
+    - _reflectionDisortFadeOut: 1
     - _refractionIntensity: 0.3
     - _smallRippleIntensity: 2
     - _smallRippleSpeed: 0.1
@@ -245,7 +245,7 @@ Material:
     - _underRange: 0
     - _waterMetallic: 0.1
     - _waterRoughness: 0.02
-    - _waveFadeEnd: 100
+    - _waveFadeEnd: 150
     - _waveFadeStart: 0
     - _waveHeight: 1.5
     - _waveNormalStr: 2
@@ -265,15 +265,15 @@ Material:
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
     - _SubWaveDirection: {r: -1, g: -1, b: -1, a: -1}
     - _WaveColor: {r: 0.3686275, g: 0.6431373, b: 0.9137255, a: 0}
-    - _causticsParams: {r: 0.05, g: 0.05, b: 2, a: 0.07}
-    - _deepColor: {r: 0.21960784, g: 0.29803923, b: 0.27560535, a: 0}
+    - _causticsParams: {r: 0.04, g: 0.04, b: 1.5, a: 0.07}
+    - _deepColor: {r: 0.21691175, g: 0.295, b: 0.2733088, a: 0}
     - _envCenter: {r: 0, g: 0, b: 0, a: 0}
     - _envSize: {r: 100, g: 100, b: 100, a: 0}
     - _foamColor: {r: 1, g: 1, b: 1, a: 0}
     - _foamParams: {r: 0.03, g: 0.03, b: 0.1, a: 0.07}
     - _fresnelColor: {r: 0.35531622, g: 0.4671426, b: 0.5566038, a: 1}
     - _largeRippleParams: {r: 0.05, g: 0.05, b: 1.5, a: 0.1}
-    - _shallowColor: {r: 0.7829002, g: 0.8584906, b: 0.8584906, a: 0}
+    - _shallowColor: {r: 0.8173134, g: 0.8962264, b: 0.8222454, a: 0}
     - _smallRippleParams: {r: 0.04, g: 0.04, b: 15, a: 0.07}
     - _specularColor: {r: 0.8, g: 0.9, b: 1, a: 0}
     - _waveCrestColor: {r: 0.322772, g: 0.6037736, b: 0.5666601, a: 1}

@@ -14,7 +14,8 @@ float3 GetRefractionColor(float2 distortUV, Texture2D CameraDepthTex, sampler sa
     // 当小于 0 时，使用未被扭曲的深度值，但大于等于 0 时使用被扭曲的深度值
     // if (depthDistortWater < 0)depthDistortWater = depthWater;
     float2 distortOpaqueUV = distortUV;
-    if (depthDistortWater < 0)distortOpaqueUV = screenPosXY;
+    if (depthDistortWater < 0)
+        distortOpaqueUV = screenPosXY;
 
     return SAMPLE_TEXTURE2D(CameraOpaqueTex, sampler_CameraOpaqueTex, distortOpaqueUV).xyz;
 }
