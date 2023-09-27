@@ -27,14 +27,9 @@ Shader "ZTY/LightingWater/URP"
         _fresnelIntensity ("Fresnel Intensity", Range(0.0, 3.0)) = 1.0
 
         [Header(Wave ______________________________________________________________________________________________________________________________________________________________________)]
-        [Header((Crest))]
-        [Space(10)]
-        [Toggle(_USECREST)]_CRESTON ("Crest On", int) = 1
-        _waveCrestColor ("Crest Color", Color) = (0.2, 0.5, 0.5, 0.0)
-        _crestRadius ("Crest Radius", Range(1.0, 4.0)) = 1.5
-        _crestIntensity ("Crest Intensity", Range(0.0, 10.0)) = 4.0
         [Header((Wave))]
         [Space(10)]
+        [Toggle(_WAVE)]_WAVE ("Wave On", int) = 1
         _waveDirection ("Wave Direction", vector) = (1.0, 1.0, 0.0, 0.0)
         _waveSpeed ("Wave Speed", float) = 2.0
         _waveScale ("Wave Scale", Range(0.0, 1.0)) = 0.9
@@ -43,6 +38,11 @@ Shader "ZTY/LightingWater/URP"
         _waveNormalStr ("wave Normal Str", float) = 5.0
         _waveFadeStart ("Wave Fade Start", float) = 5.0
         _waveFadeEnd ("Wave Fade End", float) = 150.0
+        [Header((Crest))]
+        [Space(10)]
+        _waveCrestColor ("Crest Color", Color) = (0.2, 0.5, 0.5, 0.0)
+        _crestRadius ("Crest Radius", Range(1.0, 4.0)) = 1.5
+        _crestIntensity ("Crest Intensity", Range(0.0, 10.0)) = 4.0
 
         [Header(Ripple ____________________________________________________________________________________________________________________________________________________________________)]
         [Space(10)]
@@ -98,6 +98,7 @@ Shader "ZTY/LightingWater/URP"
             #pragma shader_feature_local _ACES_ON
             #pragma shader_feature_local _USECREST
             #pragma shader_feature_local _USERIPPLE
+            #pragma shader_feature_local _WAVE
             #pragma shader_feature_local _USEREFRACTION
             #pragma shader_feature_local _USECAUSTICS
             #pragma exclude_renderers gles gles3 glcore
@@ -137,17 +138,20 @@ Shader "ZTY/LightingWater/URP"
             Varyings LitPassVertex(Attributes input)
             {
                 Varyings output = (Varyings)0;
+                output.pos_world = TransformObjectToWorld(input.pos_vertex.xyz);
+                output.pos_view = TransformWorldToView(output.pos_world);
                 VertexNormalInputs normalInput = GetVertexNormalInputs(input.normal_vertex, input.tangent_vertex);
                 output.tangent_world.xyz = normalInput.tangentWS;
                 output.bitangent_world = normalInput.bitangentWS;
                 output.normal_world = normalInput.normalWS;
-                output.pos_world = TransformObjectToWorld(input.pos_vertex.xyz);
-                float2 speed_Wave = _Time.y * _waveSpeed * _waveDirection.xy;
-                output.pos_offset = float3(0.0, 0.0, 0.0);
-                float3 normal_world2 = float3(0, 0, 0);
-                GetWaveInfo(output.pos_world.xz, speed_Wave, _waveDetailScale, _waveScale, _waveHeight, _waveNormalStr, _waveFadeStart, _waveFadeEnd, output.pos_offset, normal_world2);
+                output.pos_offset = float3(0, 0, 0);
+                float3 normal_world2 = float3(0, 1, 0);
+                #ifdef _WAVE
+                    float2 speed_Wave = _Time.y * _waveSpeed * _waveDirection.xy;
+                    GetWaveInfo(output.pos_world.xz, speed_Wave, _waveDetailScale, _waveScale, _waveHeight, _waveNormalStr, _waveFadeStart, _waveFadeEnd, output.pos_offset, normal_world2);
+                #endif
                 input.pos_vertex.xyz += output.pos_offset;
-                output.pos_view = TransformWorldToView(output.pos_world);
+
                 output.pos_clip = TransformObjectToHClip(input.pos_vertex.xyz);
                 return output;
             }
@@ -168,32 +172,36 @@ Shader "ZTY/LightingWater/URP"
                 ////////////////////////
                 //    Water Ripple    //
                 ////////////////////////
-                float3x3 matrix_TBN = float3x3(input.tangent_world.xyz, input.bitangent_world, worldNormal);
-                float3 rippleNormal = GetRippleNormal(_ripple, sampler_ripple, worldPosition.xz, _smallRippleParams);
-                rippleNormal = normalize(mul(rippleNormal, matrix_TBN)) / (input.pos_clip.w * 0.5 + 0.5);
+                float3 rippleNormal = float3(0.0, 1.0, 0.0);
+                #ifdef _USERIPPLE
+                    float3x3 matrix_TBN = float3x3(input.tangent_world.xyz, input.bitangent_world, worldNormal);
+                    rippleNormal = GetRippleNormal(_ripple, sampler_ripple, worldPosition.xz, _smallRippleParams);
+                    rippleNormal = normalize(mul(rippleNormal, matrix_TBN)) / (input.pos_clip.w * 0.5 + 0.5);
+                #endif
 
                 ///////////////////////
                 //    Water Wave     //
                 ///////////////////////
-                float2 speed_Wave = _Time.y * _waveSpeed * _waveDirection.xy;
-                float3 normalInput = worldNormal;
-                float3 wavePosition = input.pos_offset;
-                GetWaveInfo(worldPosition.xz, speed_Wave, _waveDetailScale, _waveScale, _waveHeight, _waveNormalStr, _waveFadeStart, _waveFadeEnd, wavePosition, normalInput);
-                #ifdef _USERIPPLE
-                    float3 finalWorldNormal = normalize(rippleNormal + normalInput);
-                #else
-                    float3 finalWorldNormal = normalInput;
+                float3 normalInput = float3(0.0, 1.0, 0.0);
+                #ifdef _WAVE
+                    float2 speed_Wave = _Time.y * _waveSpeed * _waveDirection.xy;
+                    float3 wavePosition = input.pos_offset;
+                    GetWaveInfo(worldPosition.xz, speed_Wave, _waveDetailScale, _waveScale, _waveHeight, _waveNormalStr, _waveFadeStart, _waveFadeEnd, wavePosition, normalInput);
                 #endif
+                float3 finalWorldNormal = normalize(rippleNormal + normalInput);
+                float ndotl = max(0.0, dot(finalWorldNormal, light_Dir));
 
                 ///////////////////////
                 //    Crest Color    //
                 ///////////////////////
-                float distortRange = GetFresnelFactor(finalWorldNormal, cameraPosition, _reflectionDisortFadeOut, 16.0);
-                finalWorldNormal = lerp(worldNormal, finalWorldNormal, distortRange);
-                float ndotl = max(0.0, dot(finalWorldNormal, light_Dir));
-                float waveCrestMask = saturate(pow((1.0 - ndotl), _crestRadius * 2.0)) * max(0.0, _crestIntensity * wavePosition.y);
-                float3 crestColor = _waveCrestColor.xyz * waveCrestMask;
-
+                float3 crestColor = 0;
+                #ifdef _WAVE
+                    float distortRange = GetFresnelFactor(finalWorldNormal, cameraPosition, _reflectionDisortFadeOut, 16.0);
+                    finalWorldNormal = lerp(worldNormal, finalWorldNormal, distortRange);
+                    float waveCrestMask = saturate(pow((1.0 - ndotl), _crestRadius * 2.0)) * max(0.0, _crestIntensity * wavePosition.y);
+                    crestColor = _waveCrestColor.xyz * waveCrestMask;
+                #endif
+                
                 //////////////////////
                 //    Foam Color    //
                 //////////////////////
@@ -221,16 +229,6 @@ Shader "ZTY/LightingWater/URP"
                 #ifdef _USECAUSTICS
                     color_caustics = GetCausticsColor(_causticsMap, sampler_causticsMap, depthToWorldPosition.xz, _causticsParams, finalWorldNormal.xz, _causticsDisort);
                 #endif
-                
-                ///////////////////////
-                //    Water alpha    //
-                ///////////////////////
-                // 采样原始深度图并计算水的深度值
-                float depthTexture = SAMPLE_TEXTURE2D(_CameraDepthTexture, sampler_CameraDepthTexture, screenPosition.xy).x;
-                float depthScene = LinearEyeDepth(depthTexture, _ZBufferParams);
-                // 水初始（无扭曲）的深度值
-                float depth_water = depthScene + input.pos_view.z;
-                depth_water = saturate((1.0 - saturate(exp(-depth_water / max(0.5, _deepRange)))) * _deepOpacity);
 
                 ////////////////////////////
                 //    Refraction Color    //
@@ -240,7 +238,16 @@ Shader "ZTY/LightingWater/URP"
                     refractionUV += finalWorldNormal.xz * _refractionIntensity * 0.1;
                 #endif
                 float3 color_Refraction = GetRefractionColor(refractionUV, _CameraDepthTexture, sampler_CameraDepthTexture, input.pos_view.z, _CameraOpaqueTexture, sampler_CameraOpaqueTexture, screenPosition.xy);
-                
+
+                ///////////////////////
+                //    Water alpha    //
+                ///////////////////////
+                // 采样原始深度图并计算水初始（无扭曲）的深度值
+                float depthTexture = SAMPLE_TEXTURE2D(_CameraDepthTexture, sampler_CameraDepthTexture, screenPosition.xy).x;
+                float depthScene = LinearEyeDepth(depthTexture, _ZBufferParams);
+                float depth_water = depthScene + input.pos_view.z;
+                depth_water = (1.0 - saturate(exp( - (depth_water) / max(0.5, _deepRange)))) * _deepOpacity;
+
                 /////////////////////////
                 //    Water Specular   //
                 /////////////////////////
@@ -249,15 +256,16 @@ Shader "ZTY/LightingWater/URP"
                 ///////////////////////
                 //    Color Blend    //
                 ///////////////////////
-                float3 shallowAreaColor = color_Refraction * (1.0 - depth_water) + color_caustics * (1.0 - depth_water) * depth_water;
-                shallowAreaColor *= _shallowColor.xyz;
                 float ndotv = saturate(dot(finalWorldNormal, cameraPosition));
                 float fresnelFactor = saturate(pow(1.0 - ndotv, _fresnelRange) * _fresnelIntensity);
+                
+                float3 shallowAreaColor = color_Refraction * _shallowColor.xyz;
                 float3 surfaceColor = lerp(_deepColor.xyz, planarReflection, fresnelFactor);
-                #ifdef _USECREST
-                    surfaceColor += crestColor;
+                float3 color_blend = lerp(_shallowColor.xyz * color_Refraction, _deepColor.xyz, depth_water) + planarReflection * fresnelFactor;
+                #ifdef _WAVE
+                    color_blend += crestColor;
                 #endif
-                float3 color_blend = lerp(shallowAreaColor, surfaceColor, depth_water);
+                color_blend += color_caustics * (1.0 - depth_water) * depth_water;
                 #ifdef _ACES_ON
                     color_blend = ACES_Tonemapping(color_blend);
                 #endif
