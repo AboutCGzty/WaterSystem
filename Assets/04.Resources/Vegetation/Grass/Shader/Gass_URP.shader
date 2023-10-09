@@ -1443,7 +1443,6 @@ Node;AmplifyShaderEditor.GetLocalVarNode;61;-560,320;Inherit;False;22;VerticalFa
 Node;AmplifyShaderEditor.SwizzleNode;115;-176,96;Inherit;False;FLOAT3;0;1;2;3;1;0;COLOR;0,0,0,0;False;1;FLOAT3;0
 Node;AmplifyShaderEditor.RegisterLocalVarNode;62;-16,96;Inherit;False;WindLineColor;-1;True;1;0;FLOAT3;0,0,0;False;1;FLOAT3;0
 Node;AmplifyShaderEditor.SimpleMultiplyOpNode;60;-336,96;Inherit;False;3;3;0;FLOAT;0;False;1;COLOR;0,0,0,0;False;2;FLOAT;0;False;1;COLOR;0
-Node;AmplifyShaderEditor.Vector3Node;158;176.0588,1192.29;Inherit;False;Constant;_Vector0;Vector 0;17;0;Create;True;0;0;0;False;0;False;0,1,0;0,0,0;0;4;FLOAT3;0;FLOAT;1;FLOAT;2;FLOAT;3
 WireConnection;67;0;64;1
 WireConnection;68;0;64;2
 WireConnection;66;0;67;0
@@ -1539,4 +1538,4 @@ WireConnection;60;0;118;0
 WireConnection;60;1;59;0
 WireConnection;60;2;61;0
 ASEEND*/
-//CHKSM=EAB0B18BCC98DE9CAF84E7586AB5C7BE95F3E8E0
+//CHKSM=15FEFE65219C2D0CC90B366C0415E28F095333FD

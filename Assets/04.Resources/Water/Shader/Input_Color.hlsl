@@ -1,6 +1,3 @@
-#include "./BRDFLibrary.cginc"
-
-
 ///////////////////////////////
 ///                         ///
 ///       ToneMapping       ///
@@ -50,6 +47,45 @@ float GetFresnelFactor(float3 normal, float3 viewDir, float range, float intensi
 /////////////////////////
 //    Water Specular   //
 /////////////////////////
+inline float Pow4_UE4(float x)
+{
+    float xx = x * x;
+    return xx * xx;
+}
+
+inline float Pow5_UE4(float x)
+{
+    float xx = x * x;
+    return xx * xx * x;
+}
+
+float D_GGX_UE4(float a2, float NoH)
+{
+    // 2 mad
+    float d = (NoH * a2 - NoH) * NoH + 1.0;
+    // 4 mul, 1 rcp
+    return a2 / (PI * d * d);
+}
+
+// Appoximation of joint Smith term for GGX
+// [Heitz 2014, "Understanding the Masking-Shadowing Function in Microfacet-Based BRDFs"]
+float Vis_SmithJointApprox(float a2, float NoV, float NoL)
+{
+    float a = sqrt(a2);
+    float Vis_SmithV = NoL * (NoV * (1.0 - a) + a);
+    float Vis_SmithL = NoV * (NoL * (1.0 - a) + a);
+    return 0.5 * rcp(Vis_SmithV + Vis_SmithL);
+}
+
+// [Schlick 1994, "An Inexpensive BRDF Model for Physically-Based Rendering"]
+float3 F_Schlick_UE4(float3 SpecularColor, float VoH)
+{
+    float Fc = Pow5_UE4(1 - VoH);					// 1 sub, 3 mul
+    //return Fc + (1 - Fc) * SpecularColor;		// 1 add, 3 mad
+    // Anything less than 2% is physically impossible and is instead considered to be shadowing
+    return saturate(50.0 * SpecularColor.g) * Fc + (1 - Fc) * SpecularColor;
+}
+
 float3 GetWaterSpecularColor(float3 specular, float3 normal, float radius, float3 lightDir, float3 viewDir, float3 lightCol)
 {
     float a2 = Pow4_UE4(pow(saturate(normal.z * 0.5 + 0.5), radius * 2.0));

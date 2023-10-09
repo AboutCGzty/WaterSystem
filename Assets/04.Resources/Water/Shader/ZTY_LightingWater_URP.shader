@@ -2,32 +2,30 @@ Shader "ZTY/LightingWater/URP"
 {
     Properties
     {
-        [Header(Tone Mapping ______________________________________________________________________________________________________________________________________________________________)]
-        [Space(10)]
-        [Toggle(_ACES_ON)]_ACESON ("ACES On", int) = 0
         [Header(Surface Color _____________________________________________________________________________________________________________________________________________________________)]
-        [Header((Basecolor))]
+        [Header((((Basecolor))))]
         [Space(10)]
         _shallowColor ("Shallow Color", Color) = (0.6, 0.8, 0.8, 0.0)
         _deepColor ("Deep Color", Color) = (0.1, 0.26, 0.3, 0.0)
-        _deepRange ("Deep Range", Range(0.0, 5.0)) = 0.2
+        _deepRange ("Deep Range", Range(0.0, 10.0)) = 1.0
         _deepOpacity ("Deep Opacity", Range(0.0, 1.0)) = 0.95
 
-        [Header((Specular))]
+        [Header((((Specular))))]
         [Space(10)]
         _specularColor ("Specular Color", Color) = (0.8, 0.9, 1.0, 0.0)
         _specularRadius ("Specular Radius", Range(1.0, 3.0)) = 1.6
         _specularIntensity ("Specular Intensity", Range(0.0, 3.0)) = 1.0
         
-        [Header((Planar Reflection))]
+        [Header((((Planar Reflection))))]
         [Space(10)]
         _reflectionDisort ("Reflection Disort", Range(0.0, 1.0)) = 0.2
         _reflectionDisortFadeOut ("Reflection Disort Fade Out", Range(1.0, 10.0)) = 2.0
         _fresnelRange ("Fresnel Range", Range(1.0, 16.0)) = 6.0
         _fresnelIntensity ("Fresnel Intensity", Range(0.0, 3.0)) = 1.0
+        [Header(___________________________________________________________________________________________________________________________________________________________________________)]
 
         [Header(Wave ______________________________________________________________________________________________________________________________________________________________________)]
-        [Header((Wave))]
+        [Header((((Wave))))]
         [Space(10)]
         [Toggle(_WAVE)]_WAVE ("Wave On", int) = 1
         _waveDirection ("Wave Direction", vector) = (1.0, 1.0, 0.0, 0.0)
@@ -38,19 +36,39 @@ Shader "ZTY/LightingWater/URP"
         _waveNormalStr ("wave Normal Str", float) = 5.0
         _waveFadeStart ("Wave Fade Start", float) = 5.0
         _waveFadeEnd ("Wave Fade End", float) = 150.0
-        [Header((Crest))]
+        [Header((((Crest))))]
         [Space(10)]
         _waveCrestColor ("Crest Color", Color) = (0.2, 0.5, 0.5, 0.0)
         _crestRadius ("Crest Radius", Range(1.0, 4.0)) = 1.5
         _crestIntensity ("Crest Intensity", Range(0.0, 10.0)) = 4.0
+        [Header(___________________________________________________________________________________________________________________________________________________________________________)]
 
         [Header(Ripple ____________________________________________________________________________________________________________________________________________________________________)]
+        [Header((((Ripple))))]
         [Space(10)]
         [Toggle(_USERIPPLE)]_RIPPLEON ("Ripple On", int) = 1
         [Normal][NoScaleOffset] _ripple ("Ripple Map", 2D) = "bump" { }
-        [Header((Tilling(XY) Intensity(Z) Speed(W)))]
+        [Header((Tilling(XY) IntensityA(Z) IntensityB(W))]
         [Space(10)]
-        _smallRippleParams ("Ripple Params", vector) = (0.03, 0.03, 1.0, 0.07)
+        _smallRippleParams ("Ripple Params", vector) = (0.03, 0.03, 1.0, 0.0)
+        [Header((Center(XY) Angle(Z) Speed(W)))]
+        [Space(10)]
+        rippleDirectionA ("Ripple Direction And Speed A", vector) = (0.0, 0.0, 0.0, 0.1)
+        rippleDirectionB ("Ripple Direction And Speed B", vector) = (0.0, 0.0, 0.0, 0.1)
+        _rippleFadeOut ("Ripple Fade Out", Range(1.0, 10.0)) = 2.0
+
+        [Header((((Detail))))]
+        [Space(10)]
+        [Toggle(_USEDETAILRIPPLE)]_DETAILRIPPLEON ("Detial On", int) = 0
+        [Normal][NoScaleOffset] _detialRipple ("Detial Map", 2D) = "bump" { }
+        [Header((Tilling(XY) IntensityA(Z) IntensityB(W)))]
+        [Space(10)]
+        _detialRippleParams ("Detial Params", vector) = (0.03, 0.03, 1.0, 0.07)
+        [Header((Center(XY) Angle(Z) Speed(W)))]
+        [Space(10)]
+        _detialDirectionA ("Detial Direction And Speed A", vector) = (0.0, 0.0, 0.0, 0.1)
+        _detialDirectionB ("Detial Direction And Speed B", vector) = (0.0, 0.0, 0.0, 0.1)
+        [Header(___________________________________________________________________________________________________________________________________________________________________________)]
 
         // [Header(Foam ____________________________________________________________________________________________________________________________________________________________________)]
         // [Space(10)]
@@ -61,12 +79,12 @@ Shader "ZTY/LightingWater/URP"
         // _foamParams ("Foam Params", vector) = (0.03, 0.03, 1.0, 0.1)
 
         [Header(Under Water _______________________________________________________________________________________________________________________________________________________________)]
-        [Header((Refraction))]
+        [Header((((Refraction))))]
         [Space(10)]
         [Toggle(_USEREFRACTION)]_REFRACTIONON ("Refraction On", int) = 1
         _refractionIntensity ("Refraction Intensity", Range(0.0, 1.0)) = 0.5
 
-        [Header((Caustics))]
+        [Header((((Caustics))))]
         [Space(10)]
         [Toggle(_USECAUSTICS)]_CAUSTICSON ("Caustics On", int) = 1
         [NoScaleOffset] _causticsMap ("Caustics Map", 2D) = "white" { }
@@ -78,11 +96,20 @@ Shader "ZTY/LightingWater/URP"
 
     SubShader
     {
-        Tags { "RenderPipeline" = "UniversalPipeline" "RenderType" = "Transparent" "Queue" = "Transparent" "IgnoreProjector" = "True" "ShaderModel" = "4.5" }
+        Tags
+        {
+            "RenderPipeline" = "UniversalPipeline"
+            "RenderType" = "Transparent"
+            "Queue" = "Transparent"
+            "IgnoreProjector" = "True" "ShaderModel" = "4.5"
+        }
         Blend One Zero
         Pass
         {
-            Tags { "LightMode" = "UniversalForward" }
+            Tags
+            {
+                "LightMode" = "UniversalForward"
+            }
             Name "Water"
             HLSLPROGRAM
             #pragma vertex LitPassVertex
@@ -95,9 +122,9 @@ Shader "ZTY/LightingWater/URP"
             #include "./Input_Refraction.hlsl"
             #include "./Input_Color.hlsl"
             // Keywords
-            #pragma shader_feature_local _ACES_ON
             #pragma shader_feature_local _USECREST
             #pragma shader_feature_local _USERIPPLE
+            #pragma shader_feature_local _USEDETAILRIPPLE
             #pragma shader_feature_local _WAVE
             #pragma shader_feature_local _USEREFRACTION
             #pragma shader_feature_local _USECAUSTICS
@@ -124,13 +151,15 @@ Shader "ZTY/LightingWater/URP"
             };
 
             CBUFFER_START(UnityPerMaterial)
-                float4 _shallowColor, _deepColor, _specularColor, _waveCrestColor, _waveDirection, _waveDetailScale, _smallRippleParams, _foamColor, _foamParams, _causticsParams;
-                float _deepRange, _deepOpacity, _specularRadius, _specularIntensity, _reflectionDisort, _reflectionDisortFadeOut, _refractionIntensity, _underRange,
+                float4 _shallowColor, _deepColor, _specularColor, _waveCrestColor, _waveDirection, _waveDetailScale, _smallRippleParams, rippleDirectionA, rippleDirectionB,
+                _detialRippleParams, _detialDirectionA, _detialDirectionB, _foamColor, _foamParams, _causticsParams;
+                float _deepRange, _deepOpacity, _specularRadius, _specularIntensity, _reflectionDisort, _reflectionDisortFadeOut, _rippleFadeOut, _refractionIntensity, _underRange,
                 _fresnelRange, _fresnelIntensity, _crestIntensity, _crestRadius, _waveSpeed, _waveScale, _waveHeight, _waveNormalStr, _waveFadeStart, _waveFadeEnd, _causticsDisort;
             CBUFFER_END
             TEXTURE2D(_causticsMap);                  SAMPLER(sampler_causticsMap);
             TEXTURE2D(_PlanarReflectionTexture);      SAMPLER(sampler_PlanarReflectionTexture);
             TEXTURE2D(_ripple);                       SAMPLER(sampler_ripple);
+            TEXTURE2D(_detialRipple);                 SAMPLER(sampler_detialRipple);
             // TEXTURE2D(_foam);                         SAMPLER(sampler_foam);
             TEXTURE2D(_CameraDepthTexture);           SAMPLER(sampler_CameraDepthTexture);
             TEXTURE2D(_CameraOpaqueTexture);          SAMPLER(sampler_CameraOpaqueTexture);
@@ -151,7 +180,6 @@ Shader "ZTY/LightingWater/URP"
                     GetWaveInfo(output.pos_world.xz, speed_Wave, _waveDetailScale, _waveScale, _waveHeight, _waveNormalStr, _waveFadeStart, _waveFadeEnd, output.pos_offset, normal_world2);
                 #endif
                 input.pos_vertex.xyz += output.pos_offset;
-
                 output.pos_clip = TransformObjectToHClip(input.pos_vertex.xyz);
                 return output;
             }
@@ -169,32 +197,48 @@ Shader "ZTY/LightingWater/URP"
                 float3 light_Dir = light.direction;
                 float3 light_Color = light.color;
                 
-                ////////////////////////
-                //    Water Ripple    //
-                ////////////////////////
-                float3 rippleNormal = float3(0.0, 1.0, 0.0);
-                #ifdef _USERIPPLE
-                    float3x3 matrix_TBN = float3x3(input.tangent_world.xyz, input.bitangent_world, worldNormal);
-                    rippleNormal = GetRippleNormal(_ripple, sampler_ripple, worldPosition.xz, _smallRippleParams);
-                    rippleNormal = normalize(mul(rippleNormal, matrix_TBN)) / (input.pos_clip.w * 0.5 + 0.5);
-                #endif
+                ///////////////////////
+                //    Water alpha    //
+                ///////////////////////
+                // 采样原始深度图并计算水初始（无扭曲）的深度值
+                float depthTexture = SAMPLE_TEXTURE2D(_CameraDepthTexture, sampler_CameraDepthTexture, screenPosition.xy).x;
+                float depthScene = LinearEyeDepth(depthTexture, _ZBufferParams);
+                float depth_water = depthScene + input.pos_view.z;
+                depth_water = (1.0 - saturate(exp( - (depth_water) / max(0.5, _deepRange)))) * _deepOpacity;
 
                 ///////////////////////
                 //    Water Wave     //
                 ///////////////////////
-                float3 normalInput = float3(0.0, 1.0, 0.0);
+                float3 wavePosition = input.pos_offset;
                 #ifdef _WAVE
                     float2 speed_Wave = _Time.y * _waveSpeed * _waveDirection.xy;
-                    float3 wavePosition = input.pos_offset;
-                    GetWaveInfo(worldPosition.xz, speed_Wave, _waveDetailScale, _waveScale, _waveHeight, _waveNormalStr, _waveFadeStart, _waveFadeEnd, wavePosition, normalInput);
+                    GetWaveInfo(worldPosition.xz, speed_Wave, _waveDetailScale, _waveScale, _waveHeight, _waveNormalStr, _waveFadeStart, _waveFadeEnd, wavePosition, worldNormal);
                 #endif
-                float3 finalWorldNormal = normalize(rippleNormal + normalInput);
-                float ndotl = max(0.0, dot(finalWorldNormal, light_Dir));
+
+                ////////////////////////
+                //    Water Ripple    //
+                ////////////////////////
+                float3x3 matrix_TBN = float3x3(input.tangent_world.xyz, input.bitangent_world, input.normal_world);
+                float3 rippleNormal = float3(0.0, 0.0, 1.0);
+                #ifdef _USERIPPLE
+                    rippleNormal = GetRippleNormal(_ripple, sampler_ripple, worldPosition.xz, _smallRippleParams, rippleDirectionA, rippleDirectionB);
+                #endif
+                float3 detailrippleNormal = float3(0.0, 0.0, 1.0);
+                #ifdef _USEDETAILRIPPLE
+                    detailrippleNormal = GetRippleNormal(_detialRipple, sampler_detialRipple, worldPosition.xz, _detialRippleParams, _detialDirectionA, _detialDirectionB);
+                #endif
+                float3 normalBlendTS = NormalBlending_ReorientedNormalMapping(rippleNormal, detailrippleNormal);
+                float3 normalBlendWS = normalize(mul(normalBlendTS, matrix_TBN));
+                float fadeOutFactor = GetFresnelFactor(worldNormal, cameraPosition, _rippleFadeOut, 16.0);
+                normalBlendWS = lerp(worldNormal, normalBlendWS, fadeOutFactor);
+                float3 finalWorldNormal = normalize(normalBlendWS + worldNormal);
+                finalWorldNormal = lerp(worldNormal, finalWorldNormal, depth_water);
 
                 ///////////////////////
                 //    Crest Color    //
                 ///////////////////////
                 float3 crestColor = 0;
+                float ndotl = max(0.0, dot(finalWorldNormal, light_Dir));
                 #ifdef _WAVE
                     float distortRange = GetFresnelFactor(finalWorldNormal, cameraPosition, _reflectionDisortFadeOut, 16.0);
                     finalWorldNormal = lerp(worldNormal, finalWorldNormal, distortRange);
@@ -239,14 +283,6 @@ Shader "ZTY/LightingWater/URP"
                 #endif
                 float3 color_Refraction = GetRefractionColor(refractionUV, _CameraDepthTexture, sampler_CameraDepthTexture, input.pos_view.z, _CameraOpaqueTexture, sampler_CameraOpaqueTexture, screenPosition.xy);
 
-                ///////////////////////
-                //    Water alpha    //
-                ///////////////////////
-                // 采样原始深度图并计算水初始（无扭曲）的深度值
-                float depthTexture = SAMPLE_TEXTURE2D(_CameraDepthTexture, sampler_CameraDepthTexture, screenPosition.xy).x;
-                float depthScene = LinearEyeDepth(depthTexture, _ZBufferParams);
-                float depth_water = depthScene + input.pos_view.z;
-                depth_water = (1.0 - saturate(exp( - (depth_water) / max(0.5, _deepRange)))) * _deepOpacity;
 
                 /////////////////////////
                 //    Water Specular   //
@@ -266,9 +302,6 @@ Shader "ZTY/LightingWater/URP"
                     color_blend += crestColor;
                 #endif
                 color_blend += color_caustics * (1.0 - depth_water) * depth_water;
-                #ifdef _ACES_ON
-                    color_blend = ACES_Tonemapping(color_blend);
-                #endif
                 color_blend *= light_Color * ndotl;
                 color_blend += specularColor * _specularIntensity * depth_water * ndotl;
 

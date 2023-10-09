@@ -152,13 +152,13 @@ Material:
     - _ZWrite: 1
     m_Colors:
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
-    - _BottomColor: {r: 0.40899244, g: 0.5566037, b: 0.11377073, a: 1}
+    - _BottomColor: {r: 0.4089924, g: 0.5566037, b: 0.1137707, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
     - _TipColor: {r: 0.43137258, g: 1, b: 0.007843138, a: 0}
-    - _TopColor: {r: 0.7220091, g: 0.8962264, b: 0.25083, a: 1}
-    - _WindLineColor: {r: 0.8222025, g: 1, b: 0.14779845, a: 1}
+    - _TopColor: {r: 0.7220091, g: 0.8962264, b: 0.25082996, a: 1}
+    - _WindLineColor: {r: 0.8222025, g: 1, b: 0.14779842, a: 1}
     - _WindLineSpeed: {r: 0, g: 0.5, b: 0, a: 0}
     - _WindParams: {r: 1, g: 0.5, b: 4, a: 10}
   m_BuildTextureStacks: []

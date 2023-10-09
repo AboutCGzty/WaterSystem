@@ -16,6 +16,18 @@ float3 LocalReflection(float3 reflecDir, float3 worldPosition, float3 boxSize, f
 
 ///////////////////////////////
 ///                         ///
+///       UV Rotation       ///
+///                         ///
+///////////////////////////////
+float2 RotationUV(float2 uv, float2 Center, float angle)
+{
+    float cosA = cos(angle / 360.0);
+    float sinB = sin(angle / 360.0);
+    return mul(uv - Center, float2x2(cosA, -sinB, sinB, cosA)) + Center;
+}
+
+///////////////////////////////
+///                         ///
 ///      NormalBlending     ///
 ///                         ///
 ///////////////////////////////
@@ -31,13 +43,15 @@ float3 NormalBlending_ReorientedNormalMapping(float3 n1, float3 n2)
 ///    RippleNormal     ///
 ///                     ///
 ///////////////////////////
-float3 GetRippleNormal(Texture2D normalTex, sampler normalSampler, float2 UV, vector normalParams)
+float3 GetRippleNormal(Texture2D normalTex, sampler normalSampler, float2 UV, vector normalParams, vector dirParamsA, vector dirParamsB)
 {
     // small tilling(XY) intensity(Z) speed(W)
-    float2 uv_Ripple = UV * normalParams.xy;
-    float speed_Ripple = normalParams.w * _Time.y;
+    float2 uv_RippleA = RotationUV(UV * normalParams.xy, dirParamsA.xy, dirParamsA.z);
+    float2 uv_RippleB = RotationUV(UV * normalParams.xy, dirParamsB.xy, dirParamsB.z);
+    float speed_RippleA = dirParamsA.w * _Time.y;
+    float speed_RippleB = dirParamsB.w * _Time.y;
 
-    float3 normal_A = UnpackNormalScale(SAMPLE_TEXTURE2D(normalTex, normalSampler, uv_Ripple + speed_Ripple), normalParams.z * 0.1);
-    float3 normal_B = UnpackNormalScale(SAMPLE_TEXTURE2D(normalTex, normalSampler, -uv_Ripple + speed_Ripple), normalParams.z * 0.1);
+    float3 normal_A = UnpackNormalScale(SAMPLE_TEXTURE2D(normalTex, normalSampler, uv_RippleA + speed_RippleA), normalParams.z);
+    float3 normal_B = UnpackNormalScale(SAMPLE_TEXTURE2D(normalTex, normalSampler, uv_RippleB + speed_RippleB), normalParams.w);
     return NormalBlending_ReorientedNormalMapping(normal_A, normal_B);
 }
